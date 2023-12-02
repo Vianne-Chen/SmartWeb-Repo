@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { Card, CardContent, Typography, TextField, CardActions, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Icon } from '@material-ui/core';
+import { Card, CardContent, Avatar, Typography, TextField, CardActions, Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { create } from './api-user';
@@ -32,6 +32,8 @@ const useStyles = makeStyles(theme => ({
 
 export default function Signup() {
   const classes = useStyles();
+
+  // useState and event handlers
   const [values, setValues] = useState({
     name: '',
     password: '',
@@ -40,24 +42,35 @@ export default function Signup() {
     error: ''
   });
 
+  const [open, setOpen] = useState(false);
+
   const handleChange = name => event => {
     setValues({...values, [name]: event.target.value});
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const clickSubmit = () => {
     const user = {
       name: values.name || undefined,
       email: values.email || undefined,
-      password: values.password || undefined,
-    };
-
+      password: values.password || undefined
+    }
     create(user).then((data) => {
+      console.log(data);
       if (data.error) {
-        setValues({ ...values, erro: data.error });
+        setValues({ ...values, error: data.error})
       } else {
-        setOpen(true);
+        setValues({ ...values, error: '', open: true})
       }
-    });
+    })
+  }   
+
+  Signup.PropTypes = {
+    open: PropTypes.bool.isRequired,
+    handleClose: PropTypes.func.isRequired,
   };
 
   // Frontend design
@@ -95,31 +108,29 @@ export default function Signup() {
             onChange={handleChange('password')}
             type="password"
             margin="normal"
-          />
+          />  
 
-          {
-            values.error&& (<Typography component="p" color="error">
-              <Icon color="error" className={classes.error}>error</Icon>
-              {values.error}
-            </Typography>)
-          }  
-
+        <br/> {
+             values.error && (<Typography component="p" color="error">
+             {values.error}</Typography>)
+          }
         </CardContent>
         <CardActions>
           <Button color="primary" variant="contained"
-            className={classes.submit}>
+            className={classes.submit}
+            onClick={clickSubmit}>
             SUBMIT  
           </Button>
         </CardActions>
       </Card>
 
-      <Dialog open={values.open} disableBackdropClick={true}>
-        <DialogTitle>New User</DialogTitle>
+      <Dialog open={values.open} onClose={handleClose}>
+        <DialogTitle>Success!</DialogTitle>
         <DialogContent>
-          <DialogContentText>New user created.</DialogContentText>
+          <DialogContentText>Your new account has been created.</DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Link to="/signin">
+          <Link to="/Signin">
             <Button color="primary" autofocus variant="contained" onClick={handleClose}>SIGN IN</Button>
           </Link>
         </DialogActions>
